@@ -39,8 +39,8 @@ class _SupportScreenState extends State<SupportScreen> {
   }
 
   Future<void> _sendEmail() async {
-    String username = 'alcidesaugusto0011@gmail.com';
-    String password = 'gaqf bati wdyw zscv';
+    String username = 'seu_email';
+    String password = 'sua_senha_de_app';
 
     final smtpServer = gmail(username, password);
     final ticketNumber = _generateTicketNumber();
