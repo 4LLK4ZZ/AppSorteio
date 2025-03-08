@@ -1,5 +1,7 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:sorteiodenumerosenomes/screens/numbers_screen.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../main.dart';
 import 'dart:async';
 import 'dart:ui';
@@ -16,11 +18,15 @@ class ResultNumbersScreen extends StatefulWidget {
   final List<int> results;
   final bool suspense;
   final DateTime drawDate;
+  final int initialNumber;
+  final int finalNumber;
 
   const ResultNumbersScreen({
     required this.results,
     required this.suspense,
     required this.drawDate,
+    required this.initialNumber,
+    required this.finalNumber,
   });
 
   @override
@@ -43,6 +49,8 @@ class _ResultNumbersScreenState extends State<ResultNumbersScreen> with SingleTi
     _animation = Tween<double>(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(parent: _animationController, curve: Curves.easeInOut),
     );
+
+    saveToHistory();
   }
 
   @override
@@ -51,6 +59,32 @@ class _ResultNumbersScreenState extends State<ResultNumbersScreen> with SingleTi
     super.dispose();
   }
 
+  Future<void> saveToHistory() async {
+    final prefs = await SharedPreferences.getInstance();
+    List<Map<String, dynamic>> historyList = [];
+
+    final String? encodedData = prefs.getString('historyList');
+    if (encodedData != null) {
+      List<dynamic> decodedList = jsonDecode(encodedData);
+      historyList = decodedList.map((item) => Map<String, dynamic>.from(item)).toList();
+    }
+
+    Map<String, dynamic> newItem = {
+      'date': widget.drawDate.toIso8601String(),
+      'source': 'number_draw'.tr(),
+      'type': 'numbers',
+      'min': widget.initialNumber,
+      'max': widget.finalNumber,
+      'results': widget.results,
+    };
+
+    print("Novo item salvo no histórico: $newItem");
+
+    historyList.insert(0, newItem);
+    await prefs.setString('historyList', json.encode(historyList));
+
+    print("Histórico atualizado: ${json.encode(historyList)}");
+  }
 
   Future<void> _shareContent(String type) async {
     String formattedDate = DateFormat('dd/MM/yyyy HH:mm').format(
@@ -135,11 +169,17 @@ class _ResultNumbersScreenState extends State<ResultNumbersScreen> with SingleTi
                         ),
                       ),
                       SizedBox(height: 24),
-                      Wrap(
-                        alignment: WrapAlignment.center,
-                        spacing: 16,
-                        runSpacing: 16,
-                        children: widget.results.map((num) => _buildResultNumber(num)).toList(),
+                      GridView.builder(
+                        shrinkWrap: true, // Evita scroll dentro do Column
+                        physics: NeverScrollableScrollPhysics(), // Impede rolagem interna
+                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: (widget.results.length <= 5) ? widget.results.length : 5,
+                          mainAxisSpacing: 12,
+                          crossAxisSpacing: 12,
+                          childAspectRatio: 2, // Mantém os blocos mais largos para acomodar números grandes
+                        ),
+                        itemCount: widget.results.length,
+                        itemBuilder: (context, index) => _buildResultNumber(widget.results[index]),
                       ),
                       Spacer(),
                       Padding(
@@ -177,31 +217,37 @@ class _ResultNumbersScreenState extends State<ResultNumbersScreen> with SingleTi
   }
 
   Widget _buildResultNumber(int num) {
-    return AnimatedContainer(
-      duration: Duration(seconds: 1),
-      width: 80,
-      height: 80,
-      decoration: BoxDecoration(
-        color: Colors.blue.shade900.withOpacity(0.9),
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.4),
-            blurRadius: 8,
-            offset: Offset(2, 2),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        return Container(
+          width: constraints.maxWidth, // Garante que o container use toda a largura disponível
+          height: constraints.maxWidth / 2, // Define uma altura proporcional
+          decoration: BoxDecoration(
+            color: Colors.blue.shade900.withOpacity(0.9),
+            borderRadius: BorderRadius.circular(20),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.4),
+                blurRadius: 8,
+                offset: Offset(2, 2),
+              ),
+            ],
           ),
-        ],
-      ),
-      child: Center(
-        child: Text(
-          '$num',
-          style: TextStyle(
-            fontSize: 32,
-            fontWeight: FontWeight.bold,
-            color: Colors.white,
+          child: Center(
+            child: FittedBox( // Ajusta o texto automaticamente ao espaço disponível
+              fit: BoxFit.scaleDown,
+              child: Text(
+                '$num',
+                style: TextStyle(
+                  fontSize: 40, // Fonte grande para números pequenos, reduz automaticamente se precisar
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
+              ),
+            ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 }

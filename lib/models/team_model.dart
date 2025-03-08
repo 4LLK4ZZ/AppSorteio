@@ -99,11 +99,9 @@ class TeamModel {
         String fileContent = '';
 
         if (result.files.single.bytes != null) {
-          // Flutter Web: Ler a partir dos bytes
           Uint8List fileBytes = result.files.single.bytes!;
           fileContent = utf8.decode(fileBytes);
         } else if (result.files.single.path != null) {
-          // Flutter Mobile/Desktop: Ler a partir do path
           File file = File(result.files.single.path!);
           fileContent = await file.readAsString();
         }
@@ -145,11 +143,13 @@ class TeamModel {
     teams = generatedTeams;
     print('✅ Equipes geradas: $teams');
 
+    saveCurrentList('automatic_list'.tr()); // ⬅️ Salva automaticamente
+
     Navigator.push(
       context,
       MaterialPageRoute(
         builder: (context) =>
-            ResultTeamScreen(teams: teams, enableSuspense: enableSuspense),
+            ResultTeamScreen(teams: teams, model: TeamModel(), enableSuspense: enableSuspense),
       ),
     );
   }

@@ -1,10 +1,12 @@
   import 'dart:async';
+import 'dart:convert';
   import 'dart:math';
   import 'package:flutter/material.dart';
   import 'package:flutter_fortune_wheel/flutter_fortune_wheel.dart';
   import 'package:confetti/confetti.dart';
   import 'package:vibration/vibration.dart';
   import 'package:easy_localization/easy_localization.dart';
+  import 'package:shared_preferences/shared_preferences.dart';
 
   class SuspenseResultNames extends StatefulWidget {
     final List<String> names;
@@ -65,7 +67,6 @@
         await Future.delayed(Duration(seconds: 2));
 
         int finalIndex = _random.nextInt(tempNames.length);
-
         _selectedIndexController.add(finalIndex);
 
         await Future.delayed(Duration(milliseconds: 2500));
@@ -84,6 +85,7 @@
 
       setState(() => _isSpinning = false);
       Navigator.pop(context, _selectedNames);
+
     }
 
     void _skipAnimation() {

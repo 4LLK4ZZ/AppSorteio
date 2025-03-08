@@ -1,21 +1,22 @@
+import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:screenshot/screenshot.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:path_provider/path_provider.dart';
 import 'package:sorteiodenumerosenomes/main.dart';
-import '../screens/teams_screen.dart';
 import '../models/team_model.dart';
 
 class ResultTeamScreen extends StatefulWidget {
   final List<List<String>> teams;
-  final TeamModel model = TeamModel();
+  final TeamModel model;
   final bool enableSuspense;
 
-  ResultTeamScreen({required this.teams, required this.enableSuspense});
+  ResultTeamScreen({required this.teams, required this.model, required this.enableSuspense});
 
   @override
   _ResultTeamScreenState createState() => _ResultTeamScreenState();
@@ -48,12 +49,45 @@ class _ResultTeamScreenState extends State<ResultTeamScreen>
       parent: _animationController,
       curve: Curves.easeInOut,
     ));
+    saveToHistory();
   }
 
   @override
   void dispose() {
     _animationController.dispose();
     super.dispose();
+  }
+
+  Future<void> saveToHistory() async {
+    final prefs = await SharedPreferences.getInstance();
+    List<Map<String, dynamic>> historyList = [];
+
+    final String? encodedData = prefs.getString('historyList');
+    if (encodedData != null) {
+      List<dynamic> decodedList = jsonDecode(encodedData);
+      historyList = decodedList.map((item) => Map<String, dynamic>.from(item)).toList();
+    }
+
+    Map<String, dynamic> newItem = {
+      'date': DateTime.now().toIso8601String(),
+      'source': 'generate_teams'.tr(),
+      'type': 'teams',
+      'teams': widget.teams,
+      'names': widget.model.names.isNotEmpty ? widget.model.names : ['Nenhum nome encontrado'],
+    };
+
+    // Verifica se o último item salvo é o mesmo
+    if (historyList.isNotEmpty && jsonEncode(historyList.first['teams']) == jsonEncode(newItem['teams'])) {
+      print("O sorteio já foi salvo, evitando duplicação.");
+      return;
+    }
+
+    print("Novo item salvo no histórico: $newItem");
+
+    historyList.insert(0, newItem);
+    await prefs.setString('historyList', json.encode(historyList));
+
+    print("Histórico atualizado: ${json.encode(historyList)}");
   }
 
   void _shareText() {

@@ -83,5 +83,18 @@
   "raffling_teams": "Raffling for team",
   "team": "Team {number}",
   "unk_date": "Unknown date",
-  "skip_anim": "Skip animation"
+  "skip_anim": "Skip animation",
+  "history": "History",
+  "from": "from",
+  "to": "to",
+  "list": "List:",
+  "date": "Date:",
+  "teamm": "Team",
+  "filter_origin": "Filter by origin",
+  "latest": "Latest",
+  "oldest": "Oldest",
+  "history_draw": "History of draws",
+  "automatic_list": "Automatic List",
+  "draw_saved": "No draws saved",
+  "clear_all": "Clear All"
 }

@@ -83,5 +83,18 @@
   "raffling_teams": "Sorteando para equipe",
   "team": "Equipe {number}",
   "unk_date": "Data desconhecida",
-  "skip_anim": "Pular animação"
+  "skip_anim": "Pular animação",
+  "history": "Histórico",
+  "from": "de",
+  "to": "a",
+  "list": "Lista:",
+  "date": "Data",
+  "teamm": "Equipe",
+  "filter_origin": "Filtrar por Origem",
+  "latest": "Mais recente",
+  "oldest": "Mais antiga",
+  "history_draw": "Histórico de Sorteios",
+  "automatic_list": "Lista Automática",
+  "draw_saved": "Nenhum sorteio salvo",
+  "clear_all": "Limpar Tudo"
 }

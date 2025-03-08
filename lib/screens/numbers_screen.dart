@@ -120,6 +120,8 @@ class _NumbersScreenState extends State<NumbersScreen> {
           results: generatedNumbers,
           suspense: suspenseEnabled,
           drawDate: drawDate,
+          finalNumber: max,
+          initialNumber: min,
         ),
       ),
     );

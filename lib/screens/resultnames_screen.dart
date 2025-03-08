@@ -1,28 +1,31 @@
+import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:screenshot/screenshot.dart';
-import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:path_provider/path_provider.dart';
 import 'package:intl/intl.dart';
-import 'package:sorteiodenumerosenomes/screens/names_screen.dart';
-import 'package:sorteiodenumerosenomes/screens/numbers_screen.dart';
 import 'suspense_resultnames.dart';
-import '../main.dart'; // Importando o background padrão
+import 'package:shared_preferences/shared_preferences.dart';
+import '../main.dart';
 
 class ResultNameScreen extends StatefulWidget {
   final List<String> names;
   final int count;
   final bool enableSuspense;
   final bool allowRepeats;
+  final List<String> selectedNames;
+  final List<String> fullList;
 
   ResultNameScreen({
     required this.names,
     required this.count,
     required this.enableSuspense,
     required this.allowRepeats,
+    required this.selectedNames,
+    required this.fullList,
   });
 
   @override
@@ -41,6 +44,8 @@ class _ResultNameScreenState extends State<ResultNameScreen>
   void initState() {
     super.initState();
     _drawDate = DateTime.now();
+    _selectedNames = List.from(widget.selectedNames);
+
     _animationController =
     AnimationController(vsync: this, duration: Duration(seconds: 5))
       ..repeat(reverse: true);
@@ -55,6 +60,8 @@ class _ResultNameScreenState extends State<ResultNameScreen>
     } else {
       _drawNames();
     }
+    saveToHistory();
+    saveCurrentList('automatic_list'.tr());
   }
 
   @override
@@ -77,7 +84,7 @@ class _ResultNameScreenState extends State<ResultNameScreen>
   }
 
   void _navigateToSuspense() async {
-    final results = await Navigator.push(
+    final result = await Navigator.push(
       context,
       MaterialPageRoute(
         builder: (context) => SuspenseResultNames(
@@ -86,11 +93,79 @@ class _ResultNameScreenState extends State<ResultNameScreen>
         ),
       ),
     );
-    if (results != null) {
-      setState(() {
-        _selectedNames = results;
-      });
+
+    if (result != null) {
+      if (result is List<String>) {
+        setState(() {
+          _selectedNames = result;
+        });
+      } else if (result is Map<String, List<String>>) {
+        setState(() {
+          _selectedNames = result['selectedNames'] ?? [];
+        });
+      } else {
+        print("⚠️ Tipo inesperado retornado: ${result.runtimeType}");
+      }
     }
+  }
+
+  Future<void> saveToHistory() async {
+    final prefs = await SharedPreferences.getInstance();
+    List<Map<String, dynamic>> historyList = [];
+
+    final String? encodedData = prefs.getString('historyList');
+    if (encodedData != null) {
+      List<dynamic> decodedList = jsonDecode(encodedData);
+      historyList = decodedList.map((item) => Map<String, dynamic>.from(item)).toList();
+    }
+
+    Map<String, dynamic> newItem = {
+      'date': _drawDate.toIso8601String(),
+      'source': 'name_draw'.tr(),
+      'type': 'names',
+      'names': _selectedNames.isNotEmpty ? _selectedNames : ['Nenhum nome encontrado'],
+    };
+
+    if (historyList.isNotEmpty && jsonEncode(historyList.first['names']) == jsonEncode(newItem['names'])) {
+      print("O sorteio já foi salvo, evitando duplicação.");
+      return;
+    }
+
+    print("Novo item salvo no histórico: $newItem");
+
+    historyList.insert(0, newItem);
+    await prefs.setString('historyList', json.encode(historyList));
+
+    print("Histórico atualizado: ${json.encode(historyList)}");
+  }
+
+  Future<void> saveCurrentList(String listName) async {
+    if (widget.names.isEmpty) {
+      print('⚠️ Lista vazia, não será salva.');
+      return;
+    }
+
+    final prefs = await SharedPreferences.getInstance();
+    List<Map<String, dynamic>> existingLists = [];
+
+    final savedListsJson = prefs.getString('savedLists');
+    if (savedListsJson != null) {
+      existingLists =
+      List<Map<String, dynamic>>.from(json.decode(savedListsJson));
+    }
+
+    final newList = {
+      'listName': listName,
+      'names': List<String>.from(widget.fullList),
+      'saveDate': DateTime.now().toIso8601String(),
+      'source': 'name_draw'.tr(),
+    };
+
+    existingLists.add(newList);
+
+    await prefs.setString('savedLists', json.encode(existingLists));
+
+    print('✅ Lista salva: ${json.encode(existingLists)}'); // 🛠️ Verifica o salvamento
   }
 
   Future<void> _shareImage() async {

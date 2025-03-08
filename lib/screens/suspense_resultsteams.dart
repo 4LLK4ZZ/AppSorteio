@@ -5,6 +5,7 @@ import 'package:flutter_fortune_wheel/flutter_fortune_wheel.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:confetti/confetti.dart';
 import 'package:rxdart/rxdart.dart';
+import 'package:sorteiodenumerosenomes/models/team_model.dart';
 import 'package:vibration/vibration.dart';
 import 'resultteams_screen.dart';
 
@@ -121,7 +122,7 @@ class _SuspenseResultTeamsScreenState extends State<SuspenseResultTeamsScreen> w
     Navigator.pushAndRemoveUntil(
       context,
       MaterialPageRoute(
-        builder: (context) => ResultTeamScreen(teams: _teams, enableSuspense: false),
+        builder: (context) => ResultTeamScreen(teams: _teams, model: TeamModel(), enableSuspense: false),
       ),
           (route) => false,
     );

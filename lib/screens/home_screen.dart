@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'numbers_screen.dart';
 import 'names_screen.dart';
 import 'teams_screen.dart';
+import 'history_screen.dart';
 import 'my_lists.dart';
 import 'support_screen.dart';
 import '../widgets/menu_button.dart';
@@ -126,6 +127,8 @@ class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMi
                             Icons.list,
                                 () => navigateTo(
                                 MyListScreen(savedLists: savedLists))),
+                        _buildMenuItem('history'.tr(), Icons.history,
+                                () => navigateTo(HistoryScreen())),
                         SizedBox(height: 20),
                         Text(
                           'settings'.tr(),

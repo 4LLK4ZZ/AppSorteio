@@ -119,6 +119,8 @@ class _SuspenseResultNumbersState extends State<SuspenseResultNumbers>
     }
   }
 
+
+
   void _navigateToResults() {
     if (selectedNumbers.length < widget.quantity) return;
 
@@ -129,6 +131,8 @@ class _SuspenseResultNumbersState extends State<SuspenseResultNumbers>
           results: selectedNumbers,
           suspense: true,
           drawDate: DateTime.now(),
+          finalNumber: widget.finalNumber,
+          initialNumber: widget.initialNumber,
         ),
       ),
     );

@@ -170,56 +170,6 @@ class _NamesScreenState extends State<NamesScreen> {
                         ),
                       ),
                       SizedBox(height: 20),
-                      IconButton(
-                        onPressed: () {
-                          if (model.names.isEmpty) {
-                            showDialog(
-                              context: context,
-                              builder: (context) => AlertDialog(
-                                title: Text('attention'.tr()),
-                                content: Text('add_one_name'.tr()),
-                                actions: [
-                                  TextButton(
-                                    onPressed: () => Navigator.of(context).pop(),
-                                    child: Text("OK"),
-                                  ),
-                                ],
-                              ),
-                            );
-                          } else {
-                            TextEditingController _listNameController = TextEditingController();
-                            showDialog(
-                              context: context,
-                              builder: (context) => AlertDialog(
-                                title: Text('name_list'.tr()),
-                                content: TextField(
-                                  controller: _listNameController,
-                                  decoration: InputDecoration(
-                                    hintText: 'enter_name_list'.tr(),
-                                  ),
-                                ),
-                                actions: [
-                                  TextButton(
-                                    onPressed: () => Navigator.of(context).pop(),
-                                    child: Text('cancel'.tr()),
-                                  ),
-                                  TextButton(
-                                    onPressed: () {
-                                      if (_listNameController.text.trim().isNotEmpty) {
-                                        model.saveCurrentList(_listNameController.text.trim());
-                                        Navigator.of(context).pop();
-                                      }
-                                    },
-                                    child: Text('save'.tr()),
-                                  ),
-                                ],
-                              ),
-                            );
-                          }
-                        },
-                        icon: Icon(Icons.save, color: Colors.white),
-                        tooltip: 'save_list'.tr(),
-                      ),
                     ]
                 ),
                 SizedBox(height: 10),
@@ -267,9 +217,11 @@ class _NamesScreenState extends State<NamesScreen> {
                             context,
                             MaterialPageRoute(
                               builder: (context) => ResultNameScreen(
+                                selectedNames: model.names,
+                                fullList: model.names,
                                 names: selectedNames,
                                 count: model.count,
-                                enableSuspense: false, // Já foi tratado no suspense
+                                enableSuspense: false,
                                 allowRepeats: model.allowRepetition,
                               ),
                             ),
@@ -281,6 +233,8 @@ class _NamesScreenState extends State<NamesScreen> {
                         context,
                         MaterialPageRoute(
                           builder: (context) => ResultNameScreen(
+                            selectedNames: model.names,
+                            fullList: model.names,
                             names: model.names,
                             count: model.count,
                             enableSuspense: model.enableSuspense,
@@ -302,6 +256,32 @@ class _NamesScreenState extends State<NamesScreen> {
                     textAlign: TextAlign.center,
                   ),
                 SizedBox(height: 20),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end, // Alinha à direita
+                  children: [
+                    ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        padding: EdgeInsets.symmetric(vertical: 15, horizontal: 30),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        backgroundColor: model.names.isNotEmpty ? Colors.red : Colors.grey, // Cinza quando desativado
+                      ),
+                      onPressed: model.names.isNotEmpty
+                          ? () {
+                        setState(() {
+                          model.names.clear();
+                        });
+                      }
+                          : null, // Desativa o botão se não houver nomes
+                      child: Text(
+                        'clear_all'.tr(),
+                        style: TextStyle(color: Colors.white),
+                      ),
+                    ),
+                  ],
+                ),
+                SizedBox(height: 5),
                 ListView.builder(
                   shrinkWrap: true,
                   physics: NeverScrollableScrollPhysics(),

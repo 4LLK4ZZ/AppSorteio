@@ -212,63 +212,6 @@ class _TeamsScreenState extends State<TeamsScreen> {
                           ),
                         ),
                       ),
-                      IconButton(
-                        onPressed: () {
-                          if (model.names.isEmpty) {
-                            showDialog(
-                              context: context,
-                              builder: (context) => AlertDialog(
-                                title: Text('attention'.tr()),
-                                content: Text(
-                                    'add_one_name'.tr()),
-                                actions: [
-                                  TextButton(
-                                    onPressed: () =>
-                                        Navigator.of(context).pop(),
-                                    child: Text("OK"),
-                                  ),
-                                ],
-                              ),
-                            );
-                          } else {
-                            TextEditingController _listNameController =
-                                TextEditingController();
-                            showDialog(
-                              context: context,
-                              builder: (context) => AlertDialog(
-                                title: Text('name_list'.tr()),
-                                content: TextField(
-                                  controller: _listNameController,
-                                  decoration: InputDecoration(
-                                    hintText: 'enter_name_list'.tr(),
-                                  ),
-                                ),
-                                actions: [
-                                  TextButton(
-                                    onPressed: () =>
-                                        Navigator.of(context).pop(),
-                                    child: Text('cancel'.tr()),
-                                  ),
-                                  TextButton(
-                                    onPressed: () {
-                                      if (_listNameController.text
-                                          .trim()
-                                          .isNotEmpty) {
-                                        model.saveCurrentList(
-                                            _listNameController.text.trim());
-                                        Navigator.of(context).pop();
-                                      }
-                                    },
-                                    child: Text('save'.tr()),
-                                  ),
-                                ],
-                              ),
-                            );
-                          }
-                        },
-                        icon: Icon(Icons.save, color: Colors.white),
-                        tooltip: 'save_list'.tr(),
-                      ),
                     ],
                   ),
                   SizedBox(height: 10),
@@ -366,6 +309,7 @@ class _TeamsScreenState extends State<TeamsScreen> {
                               enableSuspense: model.enableSuspense)
                               : ResultTeamScreen(
                               teams: model.teams,
+                              model: TeamModel(),
                               enableSuspense: model.enableSuspense),
                         ),
                       );
@@ -388,6 +332,32 @@ class _TeamsScreenState extends State<TeamsScreen> {
                     ),
                   ),
                   SizedBox(height: 20),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.end, // Alinha à direita
+                    children: [
+                      ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          padding: EdgeInsets.symmetric(vertical: 15, horizontal: 30),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          backgroundColor: model.names.isNotEmpty ? Colors.red : Colors.grey, // Cinza quando desativado
+                        ),
+                        onPressed: model.names.isNotEmpty
+                            ? () {
+                          setState(() {
+                            model.names.clear();
+                          });
+                        }
+                            : null, // Desativa o botão se não houver nomes
+                        child: Text(
+                          'clear_all'.tr(),
+                          style: TextStyle(color: Colors.white),
+                        ),
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: 5),
                   if (model.names.isNotEmpty)
                     ListView.builder(
                       shrinkWrap: true,

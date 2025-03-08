@@ -204,6 +204,10 @@ class _MyListScreenState extends State<MyListScreen> {
                 style: TextStyle(color: Colors.white70, fontSize: 14),
               ),
               Text(
+                '${'names'.tr()}: ${names.join(", ")}',
+                style: TextStyle(color: Colors.white70, fontSize: 14),
+              ),
+              Text(
                 '${'source'.tr()} $source',
                 style: TextStyle(color: Colors.white70, fontSize: 14),
               )
